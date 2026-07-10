@@ -68,6 +68,13 @@ function About() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <TeamCard
+              initial="S"
+              gradient="linear-gradient(135deg, #2563eb, #b4c5ff)"
+              name="Saurabh"
+              role="React, API & AI Integration"
+              bio="Full-Stack Developer specializing in React.js, API Integration, and AI-powered solutions. I build fast, scalable, and modern web applications that combine clean UI with smart automation — turning ideas into functional, intelligent products."
+            />
+            <TeamCard
               initial="M"
               gradient="linear-gradient(135deg, #2563eb, #b4c5ff)"
               name="Muskan"
