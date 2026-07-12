@@ -13,9 +13,14 @@ const BASE = import.meta.env["VITE_API_URL"] ?? "http://localhost:8000";
 // ── Token storage (localStorage) ─────────────────────────────────────────────
 
 export const token = {
-  get: (): string | null => localStorage.getItem("ats_token"),
-  set: (t: string) => localStorage.setItem("ats_token", t),
-  clear: () => localStorage.removeItem("ats_token"),
+  get: (): string | null =>
+    typeof window === "undefined" ? null : localStorage.getItem("ats_token"),
+  set: (t: string) => {
+    if (typeof window !== "undefined") localStorage.setItem("ats_token", t);
+  },
+  clear: () => {
+    if (typeof window !== "undefined") localStorage.removeItem("ats_token");
+  },
 };
 
 // ── Generic fetch helper ──────────────────────────────────────────────────────
@@ -37,19 +42,21 @@ async function apiFetch<T>(
   const res = await fetch(`${BASE}${path}`, { ...options, headers });
 
   if (!res.ok) {
-  if (res.status === 401) {
-    throw new Error("401 Unauthorized");
+    let message = `Request failed (${res.status})`;
+
+    try {
+      const err = await res.json();
+      message = err.detail ?? message;
+    } catch {}
+
+    if (res.status === 401) {
+      message = "Your session has expired. Please log in again.";
+    }
+
+    const error = new Error(message) as Error & { status?: number };
+    error.status = res.status;
+    throw error;
   }
-
-  let message = `Request failed (${res.status})`;
-
-  try {
-    const err = await res.json();
-    message = err.detail ?? message;
-  } catch {}
-
-  throw new Error(message);
-}
   if (res.status === 204) return undefined as T;
   return res.json() as Promise<T>;
 }
